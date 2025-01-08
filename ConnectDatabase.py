@@ -6,12 +6,27 @@ import logging
 
 def connect():
     """Establish connection to the database"""
-    conn = duckdb.connect('my_database.db')
+    conn = duckdb.connect('my_database.db', read_only=True)
+    print("Connected to the database")
+    return conn
+def connect_payments():
+    """Establish connection to the database"""
+    conn = duckdb.connect('payments.db', read_only=True)
     print("Connected to the database")
     return conn
 
+def connect_write():
+    """Establish connection to the database"""
+    conn = duckdb.connect('my_database.db', read_only=False)
+    print("Connected to the database")
+    return conn
+def connect_write_payments():
+    """Establish connection to the database"""
+    conn = duckdb.connect('payments.db', read_only=False)
+    print("Connected to the database")
+    return conn
 
-def reset(conn):
+def reset(conn,file_path,table_name):
     """Drop all tables using existing connection"""
     try:
         # Get list of all tables
@@ -25,14 +40,18 @@ def reset(conn):
         print("All tables have been dropped successfully")
 
         # Import CSV file into new table
-        conn.sql("""
-            CREATE TABLE sales AS 
-            SELECT * FROM read_csv_auto('supermarket_sales.csv')
+        conn.sql(f"""
+            CREATE TABLE {table_name} AS 
+            SELECT * FROM read_csv_auto({file_path})
         """)
-        print("Successfully imported supermarket_sales.csv into table sales")
+        print(f"Successfully imported {file_path} into table {table_name}")
 
         print("\nFirst 5 rows of the sales table:")
-        conn.sql("SELECT * FROM sales LIMIT 5").show()
+        conn.sql(f"SELECT * FROM {table_name} LIMIT 5").show()
     except Exception as e:
         print(f"Error occurred: {e}")
         raise
+
+
+
+
